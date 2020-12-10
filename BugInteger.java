@@ -8,10 +8,11 @@ import java.util.Arrays;
 
 public class BugInteger {
     private byte numero[];      //Vettore contenente il numero
+    //non ci sono cambi di prestazioni se si utilizza un vettore di int
     private int len;            //posizioni occupate
     private int dimension;      //grandezza del vettore
     private boolean positive;   //definisce se il numero è positivo o negativo
-    private static final int DEFAULTDIMENSION = 1000;
+    private static final int DEFAULTDIMENSION = 2000;
     
     public BugInteger (String str, int dimension) throws CustomizedException {
         if (dimension<1) {
@@ -81,7 +82,7 @@ public class BugInteger {
     }
     /*
     incrementa un numero in una particolare posizione
-    se è maggiore di 9 aggiunge l'avanzo ai numeri successivi
+    se è maggiore di 9-(numero da incrementare) aggiunge la rimanenza ai numeri successivi
     se è minore di zero inverte il segno e fa sub
     */
     public void add (int pos, int num) throws CustomizedException {
@@ -110,7 +111,7 @@ public class BugInteger {
     }
     /*
     decrementa un numero in una particolare posizione
-    se è maggiore di 9?
+    se è maggiore del numero da decrementare?
     se è minore di zero inverte il segno e fa add
     */
     public void sub (int pos, int num) throws CustomizedException {
@@ -195,14 +196,14 @@ public class BugInteger {
         this.len = 0;
     }
     //Restituisce le posizioni occupate dal numero
-    public int len () {
+    public int len () throws CustomizedException {
         return this.len;
     }
     //controlla se i numeri dentro il vettore sono tutti validi e se si può rimpicciolirlo
-    private void controllo () {
+    private void controllo () throws CustomizedException {
         for (int i=len-1; i>=0; i--) {
             //si dovrebbe utilizzare get(i) ma c'è un problema con le eccezioni nel toString()
-            if (numero[i]==0)
+            if (get(i)==0)
                 len--;
             else {
                 break;
@@ -213,10 +214,10 @@ public class BugInteger {
     public boolean positive () throws CustomizedException {
         return this.positive;
     }
-    //Restituisce il numero come stringa
+    //Restituisce tutti i valori del numero sottoforma di stringa
     public String string () throws CustomizedException {
         //errore java.nullpointer exception se this vale null
-        String s = "{"+len+"} ";
+        String s = "{"+len+"/"+dimension+"} ";
         if (positive) {
             s+="+ {";
         }
@@ -349,12 +350,12 @@ public class BugInteger {
         return null;
     }
     //Returns a BigInteger whose value is (this / val)
-    public BugInteger divide (BugInteger val) {
+    public BugInteger divide (BugInteger val) throws CustomizedException {
         //Lanciare eccezione in caso di divisione per zero
         return null;
     }
     //Returns a BigInteger whose value is (this % val) (modulo)
-    public BugInteger remainder (BugInteger val) {
+    public BugInteger remainder (BugInteger val) throws CustomizedException {
         //Lanciare eccezione in caso di divisione per zero
         return null;
     }
@@ -459,4 +460,12 @@ public class BugInteger {
         return s;
     }
 }
- 
+/*
+progettare e scrivere multiply, divide e remainder
+valutare il corretto funzionamento di pow, gcd, add, sub, set
+creare il main (una versione per i test ed una per la presentazione
+    deve mostrare tutte le funzionalità e tutti i metodi pubblici)
+valutare la rimozione di alcuni metodi (controllo, ecc.)
+controllo finale di tutti i metodi su un grande numero di test
+inserire tutto il javadoc
+*/
