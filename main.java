@@ -5,9 +5,6 @@ import java.math.BigInteger;
 /**
  * @version 0.2g
  * @author Mariottini Matteo
- * @author Palestro Lorenzo
- * @author Sakurti Abdel
- * @author Gregorelli Michele
  */
 
 public class EsercizioBugInteger {
