@@ -3,7 +3,7 @@ package eserciziobuginteger;
 import java.util.Arrays;
 
 /**
- * @version 1.0
+ * @version 1.2g
  */
 
 public class BugInteger {
@@ -13,7 +13,6 @@ public class BugInteger {
     private int dimension;      //grandezza del vettore
     private boolean positive;   //definisce se il numero è positivo o negativo
     private static final int DEFAULTDIMENSION = 2000;
-    
     public BugInteger (String str, int dimension) throws CustomizedException {
         if (dimension<1) {
             throw new CustomizedException("Invalid Vector's dimension (dimension: "+dimension+")");
@@ -43,13 +42,10 @@ public class BugInteger {
     public BugInteger () throws CustomizedException {
         this("", DEFAULTDIMENSION);
     }
-    
-    /*
-    modifica un numero in una particolare posizione
-    se è maggiore di 9 aggiunge l'avanzo ai numeri successivi
-    se è minore di zero inverte il segno e fa sub
-    */
-    public void set (int pos, int num) throws CustomizedException {
+    //modifica un numero in una particolare posizione
+    private void set (int pos, int num) throws CustomizedException {
+        /* se è maggiore di 9 aggiunge l'avanzo ai numeri successivi
+        se è minore di zero inverte il segno e fa sub */
         if (pos>len-1) {
                 if (pos+1>=dimension)
                     throw new CustomizedException("index over vector's length");
@@ -80,12 +76,10 @@ public class BugInteger {
             }
         }
     }
-    /*
-    incrementa un numero in una particolare posizione
-    se è maggiore di 9-(numero da incrementare) aggiunge la rimanenza ai numeri successivi
-    se è minore di zero inverte il segno e fa sub
-    */
-    public void add (int pos, int num) throws CustomizedException {
+    //incrementa un numero in una particolare posizione
+    private void add (int pos, int num) throws CustomizedException {
+        /* se è maggiore di 9-(numero da incrementare) aggiunge la rimanenza ai numeri
+        successivi se è minore di zero inverte il segno e fa sub */
         if (num<0)
             sub(pos, num*-1);
         for (int i=pos; i<dimension-1 && num>0; i++) {
@@ -109,12 +103,10 @@ public class BugInteger {
             num/=10;
         }
     }
-    /*
-    decrementa un numero in una particolare posizione
-    se è maggiore del numero da decrementare?
-    se è minore di zero inverte il segno e fa add
-    */
-    public void sub (int pos, int num) throws CustomizedException {
+    //decrementa un numero in una particolare posizione
+    private void sub (int pos, int num) throws CustomizedException {
+        /* se è maggiore del numero da decrementare?
+        se è minore di zero inverte il segno e fa add */
         if (num<0)
             add(pos, num*-1);
         for (int i=pos; i<dimension-1 && num!=0; i++) {
@@ -199,7 +191,13 @@ public class BugInteger {
     public int len () throws CustomizedException {
         return this.len;
     }
-    //controlla se i numeri dentro il vettore sono tutti validi e se si può rimpicciolirlo
+    /*
+    controlla: se i numeri dentro il vettore sono tutti validi (<0 o >9)
+        se ci sono zeri finali che può eliminare, rimpicciolendo il vettore
+    il metodo potrebbe venire eliminato perchè i metodi add, set, sub e get sono
+    gli unici a cui è permesso modificare i numeri nel vettore, e devono verificare la
+    correttezza di tali numeri da soli
+    */
     private void controllo () throws CustomizedException {
         for (int i=len-1; i>=0; i--) {
             //si dovrebbe utilizzare get(i) ma c'è un problema con le eccezioni nel toString()
@@ -226,15 +224,15 @@ public class BugInteger {
         }
         if (len>0) {
             for (int i=0; i<len-1; i++) {
-                s+=numero[i]+", ";
+                s+=get(i)+", ";
             }
-            s+=numero[len-1];
+            s+=get(len-1);
         }
         s+="}";
         return s;
     }
     //this diventa la copia di old
-    public void copy(BugInteger old) throws CustomizedException {
+    public void copy (BugInteger old) throws CustomizedException {
         this.len = old.len;
         this.dimension = old.dimension;
         this.positive = old.positive;
@@ -242,7 +240,15 @@ public class BugInteger {
             set(i, old.get(i));
         }
     }
-    
+    private void shift (int posizioni) throws CustomizedException {
+        for (int j=0; j<posizioni; j++) {
+            for (int i=len; i>0; i--) {
+                numero[i] = numero[i-1];
+            }
+            len++;
+            numero[0] = 0;
+        }
+    }
     //Returns a BugInteger whose value is the absolute value of this BugInteger
     public BugInteger abs () throws CustomizedException {
         BugInteger temp = new BugInteger(this);
@@ -338,16 +344,22 @@ public class BugInteger {
     }
     //Returns a BugInteger whose value is (this * val)
     public BugInteger multiply (BugInteger val) throws CustomizedException {
-        BugInteger min, max;
-        if (max(val) == this) {
-            max = this;
-            min = val;
+        //System.out.println("this: "+this+" val: "+val);
+        BugInteger temp = new BugInteger(), risultato = new BugInteger();
+        for (int i=0; i<this.len; i++) {
+            //Moltiplica ogni numero di this per tutti i numeri di val
+            for (int j=0; j<val.len; j++) {
+                temp.add(j, (this.get(i)*val.get(j)));
+            }
+            //slitta le posizioni di temp, pari al contatore
+            temp.shift(i);
+            risultato = risultato.add(temp);
+            //azzera la variabile temporanea
+            temp.clear();
         }
-        else {
-            max = val;
-            min = this;
-        }
-        return null;
+        //Definire il segno del risultato (numeri concordi, positivo; numeri discordi, negativo)
+        risultato.positive = this.positive == val.positive;
+        return risultato;
     }
     //Returns a BigInteger whose value is (this / val)
     public BugInteger divide (BugInteger val) throws CustomizedException {
@@ -364,7 +376,7 @@ public class BugInteger {
         //potrebbe metterci tanto tempo se l'esponente è grande (oltre il 1000)
         BugInteger temp;
         temp = this.multiply(this);
-        for (int i=0; i<exponent-1; i++) {
+        for (int i=0; i<exponent-2; i++) {
             temp = temp.multiply(this);
         }
         return temp;
@@ -397,8 +409,10 @@ public class BugInteger {
         return temp;
     }
     //Returns a BigInteger whose value is (-this)
-    public void negate () throws CustomizedException {
-        this.positive = !this.positive;
+    public BugInteger negate () throws CustomizedException {
+        BugInteger temp = this;
+        temp.positive = !temp.positive;
+        return temp;
     }
     //Converts this BigInteger to a double
     public double doubleValue () throws CustomizedException {
@@ -410,7 +424,6 @@ public class BugInteger {
             val*=-1;
         return val;
     }
-    
     @Override
     public int hashCode() {
         int hash = 7;
@@ -461,10 +474,11 @@ public class BugInteger {
     }
 }
 /*
-progettare e scrivere multiply, divide e remainder
-valutare il corretto funzionamento di pow, gcd, add, sub, set
-creare il main (una versione per i test ed una per la presentazione
-    deve mostrare tutte le funzionalità e tutti i metodi pubblici)
+progettare e scrivere divide e remainder
+creare il main (versione per la presentazione,
+    che deve mostrare tutte le funzionalità e tutti i metodi pubblici
+    infine deve mostrare un menu che l'utente può utilizzare per fare i calcoli)
+valutare il corretto funzionamento di gcd (add, sub, set)
 valutare la rimozione di alcuni metodi (controllo, ecc.)
 controllo finale di tutti i metodi su un grande numero di test
 inserire tutto il javadoc
