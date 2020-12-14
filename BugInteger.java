@@ -3,7 +3,7 @@ package eserciziobuginteger;
 import java.util.Arrays;
 
 /**
- * @version 1.2g
+ * @version 1.5
  */
 
 public class BugInteger {
@@ -42,7 +42,11 @@ public class BugInteger {
     public BugInteger () throws CustomizedException {
         this("", DEFAULTDIMENSION);
     }
-    //modifica un numero in una particolare posizione
+    /**
+    * modifica un numero in una particolare posizione
+    * @param pos Posizione in cui viene sostituito il numero
+    * @param num Numero che sostituirà quello precedente
+    */
     private void set (int pos, int num) throws CustomizedException {
         /* se è maggiore di 9 aggiunge l'avanzo ai numeri successivi
         se è minore di zero inverte il segno e fa sub */
@@ -59,7 +63,7 @@ public class BugInteger {
             /*
             QUESTA SEZIONE NON VIENE MAI CHIAMATA!!!
             se il numero è negativo, sovrascrive il numero e chiede il riporto ai numeri
-            maggiori, affiche il numero non diventa positiva
+            maggiori, affiche il numero non diventi positivo
             Numeri negativi di massimo compreso -9, numeri inferiori sono impossibili
             */
             for (int j=pos+1; j<len; j++) {
@@ -76,12 +80,19 @@ public class BugInteger {
             }
         }
     }
-    //incrementa un numero in una particolare posizione
+    /**
+     * incrementa un numero in una particolare posizione
+     * @param pos Posizione in cui viene incrementato il numero
+     * @param num Numero che verrà sommato a quello precedente
+    */
     private void add (int pos, int num) throws CustomizedException {
         /* se è maggiore di 9-(numero da incrementare) aggiunge la rimanenza ai numeri
         successivi se è minore di zero inverte il segno e fa sub */
-        if (num<0)
+        //se il numero è negativo, inverte il suo segno e fa la sottrazione
+        if (num<0) {
             sub(pos, num*-1);
+            return;
+        }
         for (int i=pos; i<dimension-1 && num>0; i++) {
             if (num<10 - get(i)) {
                 //numero è minore del massimo inseribile in quella posizione
@@ -103,7 +114,11 @@ public class BugInteger {
             num/=10;
         }
     }
-    //decrementa un numero in una particolare posizione
+    /**
+     * decrementa un numero in una particolare posizione
+     * @param pos Posizione in cui viene decrementato il numero
+     * @param num Numero che verrà sottratto a quello precedente
+    */
     private void sub (int pos, int num) throws CustomizedException {
         /* se è maggiore del numero da decrementare?
         se è minore di zero inverte il segno e fa add */
@@ -135,7 +150,11 @@ public class BugInteger {
             num/=10;
         }
     }
-    //ritorna un valore del vettore di numeri
+    /**
+     * @param pos Posizione di cui si vuole sapere il valore
+     * @return Numero contenuto in una posizione del vettore
+     * @throws eserciziobuginteger.CustomizedException
+     */
     public byte get (int pos) throws CustomizedException {
         if (pos+1>=dimension)
             throw new CustomizedException("index over dimension");
@@ -146,7 +165,11 @@ public class BugInteger {
         */
         return numero[pos];
     }
-    //il numero prende il valore della stringa
+    /**
+     * Inserire nel vettore il numero contenuto nella stringa
+     * @param str Stringa contenente un numero intero (positivo o negativo)
+     * @throws eserciziobuginteger.CustomizedException
+     */
     public void insert (String str) throws CustomizedException {
         if (str.length()<=0)
             str = "0";
@@ -178,20 +201,28 @@ public class BugInteger {
             set(pos, num);
         }
         controllo();
+        //elimina eventuali zeri non necessari ES: 00437 -> 437
         if (len<=0 && !positive)
             this.positive = true;
         //se il numero vale zero ed è nagativo, lo mette positivo!!!
     }
-    //azzera il numero
+    /**
+     * Azzera il numero
+     * @throws eserciziobuginteger.CustomizedException
+     */
     public void clear () throws CustomizedException {
         this.numero = new byte[dimension];
         this.len = 0;
     }
-    //Restituisce le posizioni occupate dal numero
+    /**
+     * Restituisce le posizioni occupate dal numero
+     * @return Le posizioni occupate dal numero
+     * @throws eserciziobuginteger.CustomizedException
+     */
     public int len () throws CustomizedException {
         return this.len;
     }
-    /*
+    /**
     controlla: se i numeri dentro il vettore sono tutti validi (<0 o >9)
         se ci sono zeri finali che può eliminare, rimpicciolendo il vettore
     il metodo potrebbe venire eliminato perchè i metodi add, set, sub e get sono
@@ -208,11 +239,17 @@ public class BugInteger {
             }
         }
     }
-    //Ritorna true se il numero è maggiore od uguale a zero, false altrimenti
+    /**
+     * @return true se il numero è maggiore od uguale a zero, false altrimenti
+     * @throws eserciziobuginteger.CustomizedException
+    */
     public boolean positive () throws CustomizedException {
         return this.positive;
     }
-    //Restituisce tutti i valori del numero sottoforma di stringa
+    /**
+     * @return Tutti gli attributi del numero sottoforma di stringa
+     * @throws CustomizedException 
+     */
     public String string () throws CustomizedException {
         //errore java.nullpointer exception se this vale null
         String s = "{"+len+"/"+dimension+"} ";
@@ -231,7 +268,11 @@ public class BugInteger {
         s+="}";
         return s;
     }
-    //this diventa la copia di old
+    /**
+     * Trasforma this nella copia di old
+     * @param old Numero BugInteger da copiare
+     * @throws CustomizedException 
+     */
     public void copy (BugInteger old) throws CustomizedException {
         this.len = old.len;
         this.dimension = old.dimension;
@@ -240,6 +281,11 @@ public class BugInteger {
             set(i, old.get(i));
         }
     }
+    /**
+     * trasla in numero di alcune posizioni, sostituendo le posizioni private dei numeri con zeri
+     * @param posizioni Numero di posizioni cui traslare il numero
+     * @throws CustomizedException 
+     */
     private void shift (int posizioni) throws CustomizedException {
         for (int j=0; j<posizioni; j++) {
             for (int i=len; i>0; i--) {
@@ -249,14 +295,23 @@ public class BugInteger {
             numero[0] = 0;
         }
     }
-    //Returns a BugInteger whose value is the absolute value of this BugInteger
+    /**
+     * @return a BugInteger whose value is the absolute value of this BugInteger
+     * @throws CustomizedException 
+     */
     public BugInteger abs () throws CustomizedException {
         BugInteger temp = new BugInteger(this);
         temp.positive = true;
         return temp;
     }
-    //Returns a BugInteger whose value is (this + val)
+    /**
+     * Restituisce this + val, senza modificarli
+     * @param val Numero BugInteger che deve essere sommato a this
+     * @return A BugInteger whose value is (this + val)
+     * @throws CustomizedException 
+     */
     public BugInteger add (BugInteger val) throws CustomizedException {
+        //eccezione se il risultato supera la dimensione massima
         if (this.positive == val.positive) { //se entrambi hanno lo stesso segno
             BugInteger temp = new BugInteger();
             temp.positive = this.positive; //definisce il segno del risultato
@@ -280,28 +335,33 @@ public class BugInteger {
                 temp.copy(val);
                 temp.positive = val.positive;
             }
-            if (this.abs().equals(val.abs())) //se i due numeri sono uguali ritorna zero
+            //se i due numeri hanno lo steso valore assoluto ritorna zero
+            if (this.abs().equals(val.abs()))
                 return new BugInteger();
+            //sottrae a temp min, un numero per volta
             for (int i=0; i<min.len(); i++) {
-                int value = temp.get(i)-min.get(i);
-                //perchè diverso?
-                if (value>0) {
-                    temp.set(i, value);
-                }
-                else {
-                    temp.sub(i, min.get(i));
-                }
+                temp.sub(i, min.get(i));
             }
             temp.controllo(); //elimina eventuali zeri finali
             return temp;
         }
     }
-    //Returns a BugInteger whose value is (this - val)
+    /**
+     * Restituisce this - val, senza modificarli
+     * @param val Numero BugInteger che deve essere sottratto a this
+     * @return A BugInteger whose value is (this - val)
+     * @throws CustomizedException 
+     */
     public BugInteger subtract (BugInteger val) throws CustomizedException {
         val.positive = !val.positive; //cambia il segno siccome cambia l'espressione
         return this.add(val);
     }
-    //Returns the maximum of this  and val
+    /**
+     * Ritorna this se this è maggiore di val, val altrimenti
+     * @param val Numero BugInteger che deve essere paragonato a this
+     * @return The maximum of this and val
+     * @throws CustomizedException 
+     */
     public BugInteger max (BugInteger val) throws CustomizedException {
         if (this.positive && !val.positive)
             return this;
@@ -335,16 +395,26 @@ public class BugInteger {
         }
         return this;
     }
-    //Returns the minimum of this and val
+    /**
+    * Restituisce l'opposto di max
+    * @param val Numero BugInteger che deve essere paragonato a this
+    * @return The minimum of this and val
+    * @throws CustomizedException 
+    */
     public BugInteger min (BugInteger val) throws CustomizedException {
-        if (this.equals(max(val)))
+        if (this.equals(this.max(val)))
             return val;
         else
             return this;
     }
-    //Returns a BugInteger whose value is (this * val)
+    /**
+     * Restituisce this * val, senza modificarli
+     * @param val Numero bugInteger che deve essere moltiplicato a this
+     * @return A BugInteger whose value is (this * val)
+     * @throws CustomizedException 
+     */
     public BugInteger multiply (BugInteger val) throws CustomizedException {
-        //System.out.println("this: "+this+" val: "+val);
+        //eccezione se il risultato supera la dimensione massima
         BugInteger temp = new BugInteger(), risultato = new BugInteger();
         for (int i=0; i<this.len; i++) {
             //Moltiplica ogni numero di this per tutti i numeri di val
@@ -361,46 +431,120 @@ public class BugInteger {
         risultato.positive = this.positive == val.positive;
         return risultato;
     }
-    //Returns a BigInteger whose value is (this / val)
-    public BugInteger divide (BugInteger val) throws CustomizedException {
-        //Lanciare eccezione in caso di divisione per zero
-        return null;
-    }
-    //Returns a BigInteger whose value is (this % val) (modulo)
-    public BugInteger remainder (BugInteger val) throws CustomizedException {
-        //Lanciare eccezione in caso di divisione per zero
-        return null;
-    }
-    //Returns a BugInteger whose value is (this^exponent)
+    /**
+     * Restituisce this ^ exponent, senza modificarli
+     * @param exponent Numero-1 di volte che this si moltiplica per se stesso
+     * @return A BugInteger whose value is (this^exponent)
+     * @throws CustomizedException 
+     */
     public BugInteger pow (int exponent) throws CustomizedException {
         //potrebbe metterci tanto tempo se l'esponente è grande (oltre il 1000)
-        BugInteger temp;
-        temp = this.multiply(this);
+        BugInteger temp = this.multiply(this);
         for (int i=0; i<exponent-2; i++) {
             temp = temp.multiply(this);
         }
         return temp;
     }
-    //Returns a BugInteger whose value is the greatest common divisor of abs(this) and abs(val)
+    /**
+     * Restituisce this / val, senza modificarli
+     * @param val Numero bugInteger che deve dividere this
+     * @return A BigInteger whose value is (this / val)
+     * @throws CustomizedException 
+     */
+    public BugInteger divide (BugInteger val) throws CustomizedException {
+        //Lanciare eccezione in caso di divisione per zero
+        //val = divisore
+        //Copia il dividendo in una variabile BugInteger (temp)
+        if (val.equals(new BugInteger()) || this.equals(new BugInteger()))
+            return null;
+        BugInteger dividendo = new BugInteger(this);
+        BugInteger num = new BugInteger(), risultato = new BugInteger();
+        boolean cicla = true;
+        int sottrazioni, t=0;
+        while (cicla) {
+            for (int i = dividendo.len-1; i>0; i--) {
+                t = i;
+                num.len++;
+                num.shift(1);
+                num.set((dividendo.len-1)-i, dividendo.get(i));
+                if (i==0)
+                    cicla = false;
+                if (num.max(val).equals(num) || i==0)
+                    break;
+            }
+            /*se ha utilizzato tutti i numeri del dividendo ed num è
+            ancora inferiore al divisore, termina la divisione*/
+            if (!cicla && !num.max(val).equals(num)) {
+                //aggiorare il dividendo
+                break;
+            }
+            /*Sottrae il divisore a NUM
+            fino a quando NUM diventa inferiore al divisore*/
+            sottrazioni = 0;
+            while (true) {
+                if (!num.equals(val) && num.min(val).equals(num)) {
+                    break;
+                }
+                num.subtract(val);
+                sottrazioni++;
+            }
+            /*Inserisce il numero di sottrazioni fatte
+            nel risultato (tipo BugInteger) (push front)*/
+            risultato.len++;
+            risultato.shift(1);
+            risultato.add((risultato.len-1), sottrazioni);
+            //potrebbe esculdere dei numeri diversi da zero fuori dalla sua lunghezza
+            dividendo.len = t+num.len;
+            for (int i=t; i<t+num.len; i++) {
+                dividendo.set(i, num.get(i));
+            }
+            //modificare dividendo.len
+        }
+        return risultato;
+    }
+    /**
+     * Restituisce this % val, senza modificarli
+     * @param val Numero bugInteger che deve dividere this
+     * @return A BigInteger whose value is (this % val)
+     * @throws CustomizedException 
+     */
+    public BugInteger remainder (BugInteger val) throws CustomizedException {
+        //Lanciare eccezione in caso di divisione per zero
+        return null;
+    }
+    /**
+     * Restituisce l'MCD tra il valore assoluto di this e quello di val
+     * @param val Numero BugInteger che deve essere paragonato a this
+     * @return A BugInteger whose value is the greatest common divisor of abs(this) and abs(val)
+     * @throws CustomizedException 
+     */
     public BugInteger gcd (BugInteger val) throws CustomizedException {
-        BugInteger a = new BugInteger(this), b = new BugInteger(val), c;
-        while(!b.equals(new BugInteger())) //ripetere finché non riduciamo a zero
-        {
+        //Codice in C preso da wikipedia e modificato
+        BugInteger a = new BugInteger(this.abs()), b = new BugInteger(val.abs()), c;
+        //ripetere finché non riduciamo a zero
+        while(!b.equals(new BugInteger())) {
              c = a.remainder(b);
              a = b; 
              b = c; //scambiamo il ruolo di a e b
         }
         return a; //... e quando b è (o è diventato) 0, il risultato è a
     }
-    //Returns a BigInteger whose value is equal to that of the specified long
+    /**
+     * Restituisce un BugInteger che ha il valore del numero inserito
+     * @param num Numero intero che deve essere restituito come BugInteger
+     * @return A BigInteger whose value is equal to that of the specified long
+     * @throws CustomizedException 
+     */
     public static BugInteger valueOf (long num) throws CustomizedException {
         BugInteger temp = new BugInteger();
+        //difinire il segno del risultato
         if (num<0) {
             num*=-1;
             temp.positive = false;
         }
         else
             temp.positive = true;
+        //inserisce ogni valore di num nel BugInteger risultante
         for (int i=0; num>0; i++) {
             temp.len++;
             temp.set(i, (byte)(num%10));
@@ -408,18 +552,29 @@ public class BugInteger {
         }
         return temp;
     }
-    //Returns a BigInteger whose value is (-this)
+    /**
+     * Ritorna un numero BugInteger che vale (-this)
+     * @return A BigInteger whose value is (-this)
+     * @throws CustomizedException 
+     */
     public BugInteger negate () throws CustomizedException {
         BugInteger temp = this;
         temp.positive = !temp.positive;
         return temp;
     }
-    //Converts this BigInteger to a double
+    /**
+     * Converts this BigInteger to a double
+     * @return this sottoforma di un numero double
+     * @throws CustomizedException 
+     */
     public double doubleValue () throws CustomizedException {
+        //perchè la conversione in double? non è meglio un long?
         double val=0;
         for (int i=0; i<this.len; i++) {
+            //potrebbe dare errori con grandi numeri
             val+=get(i)*(Math.pow(10,i));
         }
+        //definire il segno del risultato
         if (!this.positive)
             val*=-1;
         return val;
@@ -454,10 +609,7 @@ public class BugInteger {
         if (this.positive != other.positive) {
             return false;
         }
-        if (!Arrays.equals(this.numero, other.numero)) {
-            return false;
-        }
-        return true;
+        return Arrays.equals(this.numero, other.numero);
     }
     @Override
     public String toString () {
@@ -475,11 +627,6 @@ public class BugInteger {
 }
 /*
 progettare e scrivere divide e remainder
-creare il main (versione per la presentazione,
-    che deve mostrare tutte le funzionalità e tutti i metodi pubblici
-    infine deve mostrare un menu che l'utente può utilizzare per fare i calcoli)
-valutare il corretto funzionamento di gcd (add, sub, set)
-valutare la rimozione di alcuni metodi (controllo, ecc.)
-controllo finale di tutti i metodi su un grande numero di test
-inserire tutto il javadoc
+valutare il corretto funzionamento di gcd
+controllo finale sui metodi e sui commenti (javadoc)
 */
