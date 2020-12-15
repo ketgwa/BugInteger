@@ -4,10 +4,6 @@ import java.math.BigInteger;
 
 /**
  * @version 0.6
- * @author Sakurti Abdel
- * @author Mariottini Matteo
- * @author Gregorelli Michele
- * @author Palestro Lorenzo
  */
 
 public class EsercizioBugInteger {
