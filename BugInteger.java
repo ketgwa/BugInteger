@@ -3,7 +3,7 @@ package eserciziobuginteger;
 import java.util.Arrays;
 
 /**
- * @version 1.5
+ * @version 1.7
  */
 
 public class BugInteger {
@@ -445,6 +445,81 @@ public class BugInteger {
         }
         return temp;
     }
+    private BugInteger div (BugInteger val, String ris) throws CustomizedException {
+        //Lanciare eccezione in caso di divisione per zero
+        if (this.equals(new BugInteger("")) || this.equals(new BugInteger("0")))
+            throw new CustomizedException("divide zero");
+        if (this.equals(new BugInteger("1")))
+            return this;
+        //Copia il this (il dividendo) in una variabile BugInteger temporanea
+        //Copia il val (il divisore) in una variabile BugInteger temporanea
+        BugInteger dividendo = new BugInteger(), divisore = new BugInteger();
+        dividendo.copy(this);
+        divisore.copy(val.abs());
+        BugInteger num = new BugInteger(), risultato = new BugInteger();
+        boolean cicla = true;
+        int sottrazioni, t=0;
+        while (cicla) {
+            num.clear();
+            for (int i = dividendo.len-1; i>=0; i--) {
+                t = i;
+                //System.out.println("nuu: "+num.string());
+                num.shift(1);
+                num.set(0, dividendo.get(i));
+                if (i==0)
+                    cicla = false;
+                //System.out.println("num: "+num.string());
+                if (num.abs().max(divisore).equals(num.abs()) || i==0) {
+                    //System.out.println(num+" "+val+" "+i);
+                    break;
+                }
+            }
+            //System.out.println("num: "+num);
+            //System.out.println("here");
+            /*se ha utilizzato tutti i numeri del dividendo ed num è
+            ancora inferiore al divisore, termina la divisione*/
+            if (!cicla && !num.abs().max(divisore).equals(num.abs())) {
+                //aggiorare il dividendo
+                //System.out.println(num+" "+val+" "+cicla);
+                break;
+            }
+            /*Sottrae il divisore a NUM
+            fino a quando NUM diventa inferiore al divisore*/
+            sottrazioni = 0;
+            while (true) {
+                if (!num.abs().equals(divisore) && num.abs().min(divisore).equals(num.abs())) {
+                    break;
+                }
+                num = num.subtract(divisore.abs());
+                sottrazioni++;
+                //System.out.println("sott: "+sottrazioni);
+                //System.out.println(num+" "+divisore);
+            }
+            /*Inserisce il numero di sottrazioni fatte
+            nel risultato (tipo BugInteger) (push front)*/
+            risultato.shift(1);
+            risultato.add(0, sottrazioni);
+            //System.out.println("risultato: "+risultato);
+            //potrebbe esculdere dei numeri diversi da zero fuori dalla sua lunghezza
+            dividendo.len = t+num.len;
+            for (int i=t; i<t+num.len; i++) {
+                dividendo.set(i, num.get(i));
+            }
+            dividendo.controllo();
+            //System.out.println("dividendo: "+dividendo);
+            //modificare dividendo.len
+        }
+        risultato.positive = this.positive == val.positive;
+        if (risultato.abs().equals(new BugInteger().abs()))
+            risultato.positive = true;
+        System.out.println("ris: "+ris);
+        if (ris.equals("modulo")) {
+            System.out.println("here");
+            return dividendo;
+        }
+        else
+            return risultato;
+    }
     /**
      * Restituisce this / val, senza modificarli
      * @param val Numero bugInteger che deve dividere this
@@ -452,55 +527,7 @@ public class BugInteger {
      * @throws CustomizedException 
      */
     public BugInteger divide (BugInteger val) throws CustomizedException {
-        //Lanciare eccezione in caso di divisione per zero
-        //val = divisore
-        //Copia il dividendo in una variabile BugInteger (temp)
-        if (val.equals(new BugInteger()) || this.equals(new BugInteger()))
-            return null;
-        BugInteger dividendo = new BugInteger(this);
-        BugInteger num = new BugInteger(), risultato = new BugInteger();
-        boolean cicla = true;
-        int sottrazioni, t=0;
-        while (cicla) {
-            for (int i = dividendo.len-1; i>0; i--) {
-                t = i;
-                num.len++;
-                num.shift(1);
-                num.set((dividendo.len-1)-i, dividendo.get(i));
-                if (i==0)
-                    cicla = false;
-                if (num.max(val).equals(num) || i==0)
-                    break;
-            }
-            /*se ha utilizzato tutti i numeri del dividendo ed num è
-            ancora inferiore al divisore, termina la divisione*/
-            if (!cicla && !num.max(val).equals(num)) {
-                //aggiorare il dividendo
-                break;
-            }
-            /*Sottrae il divisore a NUM
-            fino a quando NUM diventa inferiore al divisore*/
-            sottrazioni = 0;
-            while (true) {
-                if (!num.equals(val) && num.min(val).equals(num)) {
-                    break;
-                }
-                num.subtract(val);
-                sottrazioni++;
-            }
-            /*Inserisce il numero di sottrazioni fatte
-            nel risultato (tipo BugInteger) (push front)*/
-            risultato.len++;
-            risultato.shift(1);
-            risultato.add((risultato.len-1), sottrazioni);
-            //potrebbe esculdere dei numeri diversi da zero fuori dalla sua lunghezza
-            dividendo.len = t+num.len;
-            for (int i=t; i<t+num.len; i++) {
-                dividendo.set(i, num.get(i));
-            }
-            //modificare dividendo.len
-        }
-        return risultato;
+        return div(val, "divisione");
     }
     /**
      * Restituisce this % val, senza modificarli
@@ -509,8 +536,12 @@ public class BugInteger {
      * @throws CustomizedException 
      */
     public BugInteger remainder (BugInteger val) throws CustomizedException {
-        //Lanciare eccezione in caso di divisione per zero
-        return null;
+        //il modulo lavora in modo ambiguo se val è negativo
+        if (val.positive == false)
+            throw new CustomizedException("Remainder with negative value");
+        if (val.abs().min(this.abs()).equals(val.abs()))
+            System.out.println("errore");
+        return div(val, "modulo");
     }
     /**
      * Restituisce l'MCD tra il valore assoluto di this e quello di val
@@ -522,12 +553,16 @@ public class BugInteger {
         //Codice in C preso da wikipedia e modificato
         BugInteger a = new BugInteger(this.abs()), b = new BugInteger(val.abs()), c;
         //ripetere finché non riduciamo a zero
-        while(!b.equals(new BugInteger())) {
+        BugInteger temp = new BugInteger("0");
+        while(true) {
              c = a.remainder(b);
-             a = b; 
-             b = c; //scambiamo il ruolo di a e b
+             System.out.println(a+" "+b);
+             a.copy(b); 
+             b.copy(c); //scambiamo il ruolo di a e b
+             if (!b.equals(temp))
+                 return a; //... e quando b è (o è diventato) 0, il risultato è a
         }
-        return a; //... e quando b è (o è diventato) 0, il risultato è a
+        //System.out.println("here");
     }
     /**
      * Restituisce un BugInteger che ha il valore del numero inserito
@@ -626,7 +661,7 @@ public class BugInteger {
     }
 }
 /*
-progettare e scrivere divide e remainder
-valutare il corretto funzionamento di gcd
+valutare il corretto funzionamento di tutti i metodi
 controllo finale sui metodi e sui commenti (javadoc)
 */
+
