@@ -4,10 +4,6 @@ import java.util.Arrays;
 
 /**
  * @version 1.8
- * @author Sakurti Abdel
- * @author Mariottini Matteo
- * @author Gregorelli Michele
- * @author Palestro Lorenzo
  */
 
 public class BugInteger {
