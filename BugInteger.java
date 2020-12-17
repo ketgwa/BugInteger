@@ -216,6 +216,8 @@ public class BugInteger {
                 break;
             }
         }
+        if (this.len == 0)
+            this.positive = true;
     }
     /**
      * @return true se il numero è maggiore od uguale a zero, false altrimenti
@@ -430,39 +432,34 @@ public class BugInteger {
         }
         return temp;
     }
-    private BugInteger div (BugInteger val, String ris) throws CustomizedException {
-        //Lanciare eccezione in caso di divisione per zero
+    private BugInteger div (BugInteger val, boolean returnTheResult) throws CustomizedException {
+        /* potrebbe ritornare il risultato se si fa una divisione oppure
+        il resto se si fa il modulo */
         if (this.equals(new BugInteger("")) || this.equals(new BugInteger("0")))
             throw new CustomizedException("divide zero");
-        //Copia il this (il dividendo) in una variabile BugInteger temporanea
-        //Copia il val (il divisore) in una variabile BugInteger temporanea
         BugInteger dividendo = new BugInteger(this.abs()), divisore = new BugInteger(val.abs());
         BugInteger num = new BugInteger(), risultato = new BugInteger();
-        boolean cicla = true;
-        int sottrazioni, l=0;
-        if (dividendo.min(divisore).equals(dividendo)) {
+        //num è il numero cui si deve sottrarre il divisore
+        boolean cicla = true, inizia = false;
+        //risuluzione di casi base
+        if (dividendo.min(divisore).equals(dividendo))
+            cicla = false;
+        if (dividendo.equals(divisore) && returnTheResult) {
+            risultato.insert("1");
             cicla = false;
         }
-        if (dividendo.equals(divisore) && ris!="modulo") {
-            risultato.set(0, 1);
-            cicla = false;
-        }
-        if (dividendo.equals(divisore) && ris=="modulo") {
+        if (dividendo.equals(divisore) && !returnTheResult) {
             dividendo.clear();
             cicla = false;
         }
-        boolean inizia = false;
-        //System.out.println("dividendo: "+dividendo);
-        //System.out.println("divisore: "+divisore);
         while (cicla) {
-            //System.out.println("num: "+num+" "+inizia);
+            //ogni ciclo aumenta num di una nuova cifra
             for (int i = dividendo.len-num.len-1; i>=0; i--) {
                 num.shift(1);
                 num.set(0, dividendo.get(i));
-                if (i==0)
-                    cicla = false;
-                //System.out.println("num: "+num);
                 if (num.abs().max(divisore).equals(num.abs()) || i==0) {
+                    if (i==0)
+                        cicla = false;
                     break;
                 }
                 else if (inizia) {
@@ -470,62 +467,52 @@ public class BugInteger {
                     risultato.set(0, 0);
                 }
             }
-            inizia = true;
-            l = num.len;
-            //System.out.println("num: "+num);
-            /*se ha utilizzato tutti i numeri del dividendo ed num è
-            ancora inferiore al divisore, termina la divisione*/
-            if (!cicla && !num.abs().max(divisore).equals(num.abs())) {
-                //aggiorare il dividendo
+            //se ha utilizzato tutti i numeri del dividendo ed num è ancora inferiore al divisore, termina la divisione
+            if (!cicla && !num.abs().max(divisore).equals(num.abs()))
                 break;
-            }
-            /*Sottrae il divisore a NUM
-            fino a quando NUM diventa inferiore al divisore*/
-            sottrazioni = 0;
+            //inizia, definisce quando devono essere aggiunnti zeri al risultato se num è inferiore al divisore
+            inizia = true;
+            //numLen tiene la lunghezza di num prima che venga modifciata dalle sottrazioni
+            int numLen = num.len;
+            //Sottrae il divisore a NUM fino a quando NUM diventa inferiore al divisore
+            int sottrazioni = 0;
             while (true) {
-                if (!num.abs().equals(divisore) && num.abs().min(divisore).equals(num.abs()))
+                if (!num.equals(divisore) && num.min(divisore).equals(num))
                     break;
                 num = num.subtract(divisore.abs());
-                //System.out.println("nnn: "+num.string());
                 sottrazioni++;
             }
-            //System.out.println("nuu: "+num);
-            /*Inserisce il numero di sottrazioni fatte
-            nel risultato (tipo BugInteger) facendo un push front*/
+            //Inserisce il numero di sottrazioni fatte nel risultato (tipo BugInteger) facendo un push front
             risultato.shift(1);
             risultato.add(0, sottrazioni);
-            //System.out.println("result: "+risultato);
-            //potrebbe esculdere dei numeri diversi da zero fuori dalla sua lunghezza
-            for (int i=dividendo.len-l; i<dividendo.len-l+num.len; i++) {
-                dividendo.set(i, num.get(i-(dividendo.len-l)));
-                //System.out.println("dividendo: "+dividendo.string());
-            }
-            for (int i=dividendo.len-l+num.len; i<dividendo.len; i++)
+            //aggiorna il dividendo
+            for (int i=dividendo.len-numLen; i<dividendo.len-numLen+num.len; i++)
+                dividendo.set(i, num.get(i-(dividendo.len-numLen)));
+            //corregge il fatto che potrebbe esculdere dei numeri diversi da zero fuori dalla sua lunghezza
+            for (int i=dividendo.len-numLen+num.len; i<dividendo.len; i++)
                 dividendo.set(i, 0);
-            dividendo.len = dividendo.len-l+num.len;
-            //modificare dividendo.len
-            int h=dividendo.len;
+            dividendo.len = dividendo.len-numLen+num.len;
+            //se il dividendo rimane con solo zeri, inserisce quel numero di zeri nel risultato
+            int length=dividendo.len;
             dividendo.controllo();
-            //System.out.println("dividendo: "+dividendo);
             if (dividendo.equals(new BugInteger())) {
-                for (int i=0; i<h; i++) {
+                for (int i=0; i<length; i++) {
                     risultato.shift(1);
                     risultato.set(0, 0);
                 }
                 break;
             }
         }
-        risultato.positive = this.positive == val.positive;
-        dividendo.positive = this.positive;
-        //System.out.println(this.positive+" "+val.positive+" "+dividendo.positive);
-        if (dividendo.len == 0)
-                dividendo.positive = true;
-        if (risultato.len == 0)
-                risultato.positive = true;
-        if (ris.equals("modulo"))
+        if (!returnTheResult) {
+            dividendo.positive = this.positive;
+            dividendo.controllo();
             return dividendo;
-        else
+        }
+        else {
+            risultato.positive = this.positive == val.positive;
+            risultato.controllo();
             return risultato;
+        }
     }
     /**
      * Restituisce this / val, senza modificarli
@@ -534,7 +521,7 @@ public class BugInteger {
      * @throws CustomizedException 
      */
     public BugInteger divide (BugInteger val) throws CustomizedException {
-        return div(val, "divisione");
+        return div(val, true);
     }
     /**
      * Restituisce this % val, senza modificarli
@@ -544,7 +531,7 @@ public class BugInteger {
      */
     public BugInteger remainder (BugInteger val) throws CustomizedException {
         //il modulo lavora in modo ambiguo se val è negativo
-       return div(val, "modulo");
+       return div(val, false);
     }
     /**
      * Restituisce l'MCD tra il valore assoluto di this e quello di val
@@ -659,10 +646,3 @@ public class BugInteger {
         return s;
     }
 }
-/*
-valutare il corretto funzionamento di tutti i metodi (ed eventuale 
-    miglioramento) e commentare tutto il codice
-Decidere come avverrà l'esposizione
-
-Potrebbe sbagliare se si eseguono calcoli multipli sullo stesso numero?
-*/
