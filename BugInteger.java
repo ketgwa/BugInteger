@@ -3,11 +3,7 @@ package eserciziobuginteger;
 import java.util.Arrays;
 
 /**
- * @version 1.7
- * @author Sakurti Abdel
- * @author Mariottini Matteo
- * @author Gregorelli Michele
- * @author Palestro Lorenzo
+ * @version 1.8
  */
 
 public class BugInteger {
@@ -456,6 +452,8 @@ public class BugInteger {
             cicla = false;
         }
         boolean inizia = false;
+        //System.out.println("dividendo: "+dividendo);
+        //System.out.println("divisore: "+divisore);
         while (cicla) {
             //System.out.println("num: "+num+" "+inizia);
             for (int i = dividendo.len-num.len-1; i>=0; i--) {
@@ -506,8 +504,16 @@ public class BugInteger {
                 dividendo.set(i, 0);
             dividendo.len = dividendo.len-l+num.len;
             //modificare dividendo.len
+            int h=dividendo.len;
             dividendo.controllo();
             //System.out.println("dividendo: "+dividendo);
+            if (dividendo.equals(new BugInteger())) {
+                for (int i=0; i<h; i++) {
+                    risultato.shift(1);
+                    risultato.set(0, 0);
+                }
+                break;
+            }
         }
         risultato.positive = this.positive == val.positive;
         dividendo.positive = this.positive;
