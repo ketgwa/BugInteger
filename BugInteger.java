@@ -4,6 +4,10 @@ import java.util.Arrays;
 
 /**
  * @version 1.8
+ * @author Sakurti Abdel
+ * @author Mariottini Matteo
+ * @author Gregorelli Michele
+ * @author Palestro Lorenzo
  */
 
 public class BugInteger {
@@ -138,11 +142,6 @@ public class BugInteger {
     public byte get (int pos) throws CustomizedException {
         if (pos+1>=dimension)
             throw new CustomizedException("index over dimension");
-        /*
-        if (pos>len)
-            throw new CustomizedException("Invalid position (pos: "+pos+")"+this+" "+len+" "+numero[pos]);
-            //problems!?
-        */
         return numero[pos];
     }
     /**
@@ -320,13 +319,10 @@ public class BugInteger {
             if (this.abs().equals(val.abs()))
                 return new BugInteger();
             //sottrae a temp min, un numero per volta
-            //System.out.println("temp: "+temp);
             for (int i=0; i<min.len(); i++) {
                 temp.sub(i, min.get(i));
-                //System.out.println("temp: "+temp.string()+" "+i+" "+min.get(i));
             }
             temp.controllo(); //elimina eventuali zeri finali
-            //System.out.println("temp: "+temp);
             return temp;
         }
     }
@@ -521,6 +517,7 @@ public class BugInteger {
      * @throws CustomizedException 
      */
     public BugInteger divide (BugInteger val) throws CustomizedException {
+        //chiede di restituire il risultato
         return div(val, true);
     }
     /**
@@ -530,8 +527,8 @@ public class BugInteger {
      * @throws CustomizedException 
      */
     public BugInteger remainder (BugInteger val) throws CustomizedException {
-        //il modulo lavora in modo ambiguo se val è negativo
-       return div(val, false);
+        //chiede di restituire il resto
+        return div(val, false);
     }
     /**
      * Restituisce l'MCD tra il valore assoluto di this e quello di val
